@@ -35,9 +35,9 @@ export class MikroMetric {
   private static serviceName: string;
   private static metric: MetricLog;
 
-  private constructor() {
-    MikroMetric.namespace = '';
-    MikroMetric.serviceName = '';
+  private constructor(namespace: string, serviceName: string) {
+    MikroMetric.namespace = namespace;
+    MikroMetric.serviceName = serviceName;
     MikroMetric.metric = this.createBaseMetricObject();
   }
 
@@ -49,13 +49,11 @@ export class MikroMetric {
    * @example mikroMetric.start({ namespace: 'MyNamespace', serviceName: 'MyService' });
    */
   public static start(input?: MikroMetricInput): MikroMetric {
-    if (!MikroMetric.instance) MikroMetric.instance = new MikroMetric();
-    MikroMetric.namespace = input?.namespace || process.env.MIKROMETRIC_NAMESPACE || '';
-    MikroMetric.serviceName = input?.serviceName || process.env.MIKROMETRIC_SERVICE_NAME || '';
+    const namespace = input?.namespace || process.env.MIKROMETRIC_NAMESPACE || '';
+    const serviceName = input?.serviceName || process.env.MIKROMETRIC_SERVICE_NAME || '';
+    if (!namespace || !serviceName) throw new MissingRequiredStartParamsError();
 
-    if (!MikroMetric.namespace || !MikroMetric.serviceName)
-      throw new MissingRequiredStartParamsError();
-
+    if (!MikroMetric.instance) MikroMetric.instance = new MikroMetric(namespace, serviceName);
     return MikroMetric.instance;
   }
 
@@ -65,7 +63,7 @@ export class MikroMetric {
    * @example mikroMetric.reset();
    */
   public reset(): void {
-    MikroMetric.instance = new MikroMetric();
+    MikroMetric.instance = new MikroMetric(MikroMetric.namespace, MikroMetric.serviceName);
   }
 
   /**
