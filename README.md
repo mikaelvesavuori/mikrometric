@@ -4,8 +4,6 @@
 
 ![Build Status](https://github.com/mikaelvesavuori/mikrometric/workflows/main/badge.svg)
 
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fmikaelvesavuori%2Fmikrometric.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fmikaelvesavuori%2Fmikrometric?ref=badge_shield)
-
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=mikaelvesavuori_mikrometric&metric=alert_status)](https://sonarcloud.io/dashboard?id=mikaelvesavuori_mikrometric)
 
 [![codecov](https://codecov.io/gh/mikaelvesavuori/mikrometric/branch/main/graph/badge.svg?token=S7D3RM9TO7)](https://codecov.io/gh/mikaelvesavuori/mikrometric)
@@ -118,4 +116,4 @@ You can set `MIKROMETRIC_NAMESPACE` and/or `MIKROMETRIC_SERVICE_NAME` respective
 
 ## License
 
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fmikaelvesavuori%2Fmikrometric.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fmikaelvesavuori%2Fmikrometric?ref=badge_large)
+MIT. See `LICENSE` file.
