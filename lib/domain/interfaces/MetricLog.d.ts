@@ -1,5 +1,4 @@
-export declare type Unit = 'Milliseconds' | 'Count';
-export declare type PropertyValue = string | number | Record<string, string | number>;
+import { PropertyValue, Unit } from './Units';
 export declare type MetricLog = {
     [key: string]: PropertyValue | AwsEmfMetadata;
     Service: string;
