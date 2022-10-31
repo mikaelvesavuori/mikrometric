@@ -20,7 +20,6 @@ MikroMetric is the quickest way to get going with AWS metrics (CloudWatch Embedd
 - Easier to understand than raw EMF and less chance of breaking it (or your computer, trying to get it right!)
 - Less bloated than the other major libraries
 - Cuts out all the stuff you won't need in cloud/serverless
-- Uses `process.stdout.write()` rather than `console.log()` so you can safely use it in Lambda
 - Tiny (~1.6 KB gzipped)
 - Has zero dependencies
 - Has 100% test coverage
