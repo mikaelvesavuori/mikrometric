@@ -211,7 +211,7 @@ export class MikroMetric {
         CloudWatchMetrics: [
           {
             Namespace: MikroMetric.namespace,
-            Dimensions: [['Service']],
+            Dimensions: [['service']],
             Metrics: []
           }
         ]

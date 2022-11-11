@@ -1,7 +1,7 @@
 {
   "name": "mikrometric",
   "description": "mikrometric is a Lambda-oriented lightweight wrapper for producing AWS CloudWatch Embedded Metric Format-compatible metric logs.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": "Mikael Vesavuori",
   "license": "MIT",
   "main": "./lib/index.js",
