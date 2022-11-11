@@ -60,10 +60,10 @@ Your metric log will look something like this in CloudWatch Logs:
     "CloudWatchMetrics": [
       {
         "Namespace": "MyNamespace",
-        "Dimensions": [["Service", "User"]],
+        "Dimensions": [["service", "user"]],
         "Metrics": [
           {
-            "Name": "Duration",
+            "Name": "duration",
             "Unit": "Milliseconds"
           }
         ]
