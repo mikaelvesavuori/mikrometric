@@ -41,11 +41,11 @@ export class MikroMetric {
   private static context: any;
   private static metric: MetricBaseObject;
 
-  private constructor(namespace: string, serviceName: string, event?: any, context?: any) {
+  private constructor(namespace: string, serviceName: string, event: any, context: any) {
     MikroMetric.namespace = namespace;
     MikroMetric.serviceName = serviceName;
-    MikroMetric.event = event || {};
-    MikroMetric.context = context || {};
+    MikroMetric.event = event;
+    MikroMetric.context = context;
     MikroMetric.metric = this.createBaseMetricObject();
   }
 
