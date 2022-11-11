@@ -4,6 +4,26 @@ import { MikroMetric } from '../src/domain/entities/MikroMetric';
 
 const config = { namespace: 'MyNamespace', serviceName: 'MyService' };
 
+function setEnv() {
+  process.env.AWS_REGION = 'eu-north-1';
+  process.env.AWS_EXECUTION_ENV = 'AWS_Lambda_nodejs16.x';
+  process.env.AWS_LAMBDA_FUNCTION_NAME = 'TestFunction';
+  process.env.AWS_LAMBDA_FUNCTION_MEMORY_SIZE = '512';
+  process.env.AWS_LAMBDA_FUNCTION_VERSION = '$LATEST';
+  process.env.AWS_LAMBDA_LOG_GROUP_NAME = 'TestFunctionLogGroup';
+  process.env.AWS_LAMBDA_LOG_STREAM_NAME = 'TestFunctionLogStream';
+}
+
+function clearEnv() {
+  process.env.AWS_REGION = '';
+  process.env.AWS_EXECUTION_ENV = '';
+  process.env.AWS_LAMBDA_FUNCTION_NAME = '';
+  process.env.AWS_LAMBDA_FUNCTION_MEMORY_SIZE = '';
+  process.env.AWS_LAMBDA_FUNCTION_VERSION = '';
+  process.env.AWS_LAMBDA_LOG_GROUP_NAME = '';
+  process.env.AWS_LAMBDA_LOG_STREAM_NAME = '';
+}
+
 /**
  * POSITIVE TESTS
  */
@@ -14,6 +34,33 @@ test.serial('It should set the instance to a new one', (t) => {
   const isInstance = mikroMetric instanceof MikroMetric;
 
   t.is(isInstance, expected);
+});
+
+test.serial('It should set Lambda metadata', (t) => {
+  setEnv();
+  const mikroMetric = MikroMetric.start(config);
+  mikroMetric.reset();
+
+  const expected = {
+    functionMemorySize: '512',
+    functionName: 'TestFunction',
+    functionVersion: '$LATEST',
+    logGroupName: 'TestFunctionLogGroup',
+    logStreamName: 'TestFunctionLogStream',
+    region: 'eu-north-1',
+    runtime: 'AWS_Lambda_nodejs16.x',
+    service: 'MyService'
+  };
+
+  const result: any = mikroMetric.flush();
+  delete result['_aws'];
+
+  console.log('result', result);
+
+  // @ts-ignore
+  t.deepEqual(result, expected);
+
+  clearEnv();
 });
 
 test.serial('It should capture the namespace from the process environment', (t) => {
@@ -64,11 +111,11 @@ test.serial('It should put a dimension', (t) => {
   const mikroMetric = MikroMetric.start(config);
   const expected = true;
 
-  mikroMetric.putDimension('User', 'Sam Person');
+  mikroMetric.putDimension('user', 'Sam Person');
   const log = mikroMetric.flush();
   const dimensions = log._aws.CloudWatchMetrics[0].Dimensions[0];
 
-  const result = dimensions.includes('User');
+  const result = dimensions.includes('user');
   t.is(result, expected);
 });
 

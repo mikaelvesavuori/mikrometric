@@ -36,9 +36,9 @@ import { MikroMetric } from 'mikrometric';
 
 const mikroMetric = MikroMetric.start({ namespace: 'MyNamespace', serviceName: 'MyServiceName' });
 
-mikroMetric.putDimension('User', 'Sam Person');
-mikroMetric.putMetric('Duration', 83, 'Milliseconds');
-mikroMetric.setProperty('CorrelationId', '8d5a0ba6-05e0-4c9b-bc7c-9164ea1bdedd');
+mikroMetric.putDimension('user', 'Sam Person');
+mikroMetric.putMetric('duration', 83, 'Milliseconds');
+mikroMetric.setProperty('correlationId', '8d5a0ba6-05e0-4c9b-bc7c-9164ea1bdedd');
 
 mikroMetric.flush();
 ```
@@ -47,14 +47,14 @@ Your metric log will look something like this in CloudWatch Logs:
 
 ```json
 {
-  "Service": "MyServiceName",
-  "Region": "eu-north-1",
-  "Runtime": "AWS_Lambda_nodejs16.x",
-  "FunctionName": "aws-emf-demo-dev-CreateExampleMetrics",
-  "FunctionMemorySize": "512",
-  "FunctionVersion": "$LATEST",
-  "LogGroupName": "/aws/lambda/aws-emf-demo-dev-CreateExampleMetrics",
-  "LogStreamName": "2022/10/23/[$LATEST]e731d9b847d04b54bb4e67ef248a3fd0",
+  "service": "MyServiceName",
+  "region": "eu-north-1",
+  "runtime": "AWS_Lambda_nodejs16.x",
+  "functionName": "aws-emf-demo-dev-CreateExampleMetrics",
+  "functionMemorySize": "512",
+  "functionVersion": "$LATEST",
+  "logGroupName": "/aws/lambda/aws-emf-demo-dev-CreateExampleMetrics",
+  "logStreamName": "2022/10/23/[$LATEST]e731d9b847d04b54bb4e67ef248a3fd0",
   "_aws": {
     "Timestamp": 1666550869329,
     "CloudWatchMetrics": [
@@ -70,9 +70,9 @@ Your metric log will look something like this in CloudWatch Logs:
       }
     ]
   },
-  "User": "Sam Person",
-  "Duration": 83,
-  "CorrelationId": "8d5a0ba6-05e0-4c9b-bc7c-9164ea1bdedd"
+  "user": "Sam Person",
+  "duration": 83,
+  "correlationId": "8d5a0ba6-05e0-4c9b-bc7c-9164ea1bdedd"
 }
 ```
 
@@ -87,19 +87,19 @@ You can now use [CloudWatch Logs Insights](https://console.aws.amazon.com/cloudw
 #### Put a dimension
 
 ```typescript
-mikroMetric.putDimension('User', 'Sam Person');
+mikroMetric.putDimension('user', 'Sam Person');
 ```
 
 #### Put a metric
 
 ```typescript
-mikroMetric.putMetric('Duration', 83, 'Milliseconds');
+mikroMetric.putMetric('duration', 83, 'Milliseconds');
 ```
 
 #### Set a property
 
 ```typescript
-mikroMetric.setProperty('CorrelationId', '8d5a0ba6-05e0-4c9b-bc7c-9164ea1bdedd');
+mikroMetric.setProperty('correlationId', '8d5a0ba6-05e0-4c9b-bc7c-9164ea1bdedd');
 ```
 
 #### Flush

@@ -198,14 +198,14 @@ export class MikroMetric {
    */
   private createBaseMetricObject(): MetricLog {
     return {
-      Service: MikroMetric.serviceName,
-      Region: process.env.AWS_REGION || '',
-      Runtime: process.env.AWS_EXECUTION_ENV || '',
-      FunctionName: process.env.AWS_LAMBDA_FUNCTION_NAME || '',
-      FunctionMemorySize: process.env.AWS_LAMBDA_FUNCTION_MEMORY_SIZE || '',
-      FunctionVersion: process.env.AWS_LAMBDA_FUNCTION_VERSION || '',
-      LogGroupName: process.env.AWS_LAMBDA_LOG_GROUP_NAME || '',
-      LogStreamName: process.env.AWS_LAMBDA_LOG_STREAM_NAME || '',
+      service: MikroMetric.serviceName,
+      region: process.env.AWS_REGION || '',
+      runtime: process.env.AWS_EXECUTION_ENV || '',
+      functionName: process.env.AWS_LAMBDA_FUNCTION_NAME || '',
+      functionMemorySize: process.env.AWS_LAMBDA_FUNCTION_MEMORY_SIZE || '',
+      functionVersion: process.env.AWS_LAMBDA_FUNCTION_VERSION || '',
+      logGroupName: process.env.AWS_LAMBDA_LOG_GROUP_NAME || '',
+      logStreamName: process.env.AWS_LAMBDA_LOG_STREAM_NAME || '',
       _aws: {
         Timestamp: Date.now(),
         CloudWatchMetrics: [
