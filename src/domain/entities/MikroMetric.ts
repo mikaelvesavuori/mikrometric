@@ -1,4 +1,8 @@
-import { MetricLog } from '../interfaces/MetricLog';
+import { randomUUID } from 'crypto';
+
+import { getMetadata } from 'aws-metadata-utils';
+
+import { DynamicMetadata, MetricBaseObject, MetricObject } from '../interfaces/Metric';
 import { MikroMetricInput } from '../interfaces/MikroMetricInput';
 import { PropertyValue, Unit } from '../interfaces/Units';
 
@@ -33,11 +37,15 @@ export class MikroMetric {
   private static instance: MikroMetric;
   private static namespace: string;
   private static serviceName: string;
-  private static metric: MetricLog;
+  private static event: any;
+  private static context: any;
+  private static metric: MetricBaseObject;
 
-  private constructor(namespace: string, serviceName: string) {
+  private constructor(namespace: string, serviceName: string, event?: any, context?: any) {
     MikroMetric.namespace = namespace;
     MikroMetric.serviceName = serviceName;
+    MikroMetric.event = event || {};
+    MikroMetric.context = context || {};
     MikroMetric.metric = this.createBaseMetricObject();
   }
 
@@ -53,7 +61,17 @@ export class MikroMetric {
     const serviceName = input?.serviceName || process.env.MIKROMETRIC_SERVICE_NAME || '';
     if (!namespace || !serviceName) throw new MissingRequiredStartParamsError();
 
-    if (!MikroMetric.instance) MikroMetric.instance = new MikroMetric(namespace, serviceName);
+    const event = input?.event || {};
+    const context = input?.context || {};
+
+    if (!MikroMetric.instance)
+      MikroMetric.instance = new MikroMetric(namespace, serviceName, event, context);
+
+    MikroMetric.namespace = namespace;
+    MikroMetric.serviceName = serviceName;
+    MikroMetric.event = event;
+    MikroMetric.context = context;
+
     return MikroMetric.instance;
   }
 
@@ -63,7 +81,12 @@ export class MikroMetric {
    * @example mikroMetric.reset();
    */
   public reset(): void {
-    MikroMetric.instance = new MikroMetric(MikroMetric.namespace, MikroMetric.serviceName);
+    MikroMetric.instance = new MikroMetric(
+      MikroMetric.namespace,
+      MikroMetric.serviceName,
+      MikroMetric.event,
+      MikroMetric.context
+    );
   }
 
   /**
@@ -153,18 +176,60 @@ export class MikroMetric {
    *
    * @example mikroMetric.flush();
    */
-  public flush(): MetricLog {
-    // Make completely new copy
-    const metric: MetricLog = JSON.parse(JSON.stringify(MikroMetric.metric));
-
-    // Flush or "send" log by writing to STDOUT
+  public flush(): MetricObject {
+    const metric = this.createMetricObject();
     console.log(JSON.stringify(metric));
-
-    // Next metric log will be a clean, new one
     this.reset();
-
-    // Return our copy if we want to inspect it
     return metric;
+  }
+
+  /**
+   * @description Create the base AWS EMF object shape.
+   *
+   * @see https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format_Specification.html
+   * @see https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html
+   */
+  private createBaseMetricObject(): MetricBaseObject {
+    return {
+      service: MikroMetric.serviceName,
+      _aws: {
+        Timestamp: Date.now(),
+        CloudWatchMetrics: [
+          {
+            Namespace: MikroMetric.namespace,
+            Dimensions: [['service']],
+            Metrics: []
+          }
+        ]
+      }
+    };
+  }
+
+  /**
+   * @description Create the metric object.
+   */
+  private createMetricObject(): MetricObject {
+    const completeMetric = this.sortOutput({
+      ...MikroMetric.metric,
+      ...this.createDynamicMetadata()
+    });
+
+    return this.filterMetadata(JSON.parse(JSON.stringify(completeMetric)));
+  }
+
+  /**
+   * @description Get dynamic metadata with `aws-metadata-utils` and
+   * add some extra bits on top.
+   */
+  private createDynamicMetadata(): DynamicMetadata {
+    const timeNow = Date.now();
+
+    return {
+      ...getMetadata(MikroMetric.event, MikroMetric.context),
+      id: randomUUID(),
+      timestamp: new Date(timeNow).toISOString(),
+      timestampEpoch: `${timeNow}`
+    };
   }
 
   /**
@@ -191,31 +256,29 @@ export class MikroMetric {
   }
 
   /**
-   * @description Create the base AWS EMF object shape.
-   *
-   * @see https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format_Specification.html
-   * @see https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html
+   * @description Filter metadata from empties.
    */
-  private createBaseMetricObject(): MetricLog {
-    return {
-      service: MikroMetric.serviceName,
-      region: process.env.AWS_REGION || '',
-      runtime: process.env.AWS_EXECUTION_ENV || '',
-      functionName: process.env.AWS_LAMBDA_FUNCTION_NAME || '',
-      functionMemorySize: process.env.AWS_LAMBDA_FUNCTION_MEMORY_SIZE || '',
-      functionVersion: process.env.AWS_LAMBDA_FUNCTION_VERSION || '',
-      logGroupName: process.env.AWS_LAMBDA_LOG_GROUP_NAME || '',
-      logStreamName: process.env.AWS_LAMBDA_LOG_STREAM_NAME || '',
-      _aws: {
-        Timestamp: Date.now(),
-        CloudWatchMetrics: [
-          {
-            Namespace: MikroMetric.namespace,
-            Dimensions: [['service']],
-            Metrics: []
-          }
-        ]
-      }
-    };
+  private filterMetadata(metadata: Record<string, any>) {
+    const filteredMetadata: any = {};
+
+    Object.entries(metadata).forEach((entry: any) => {
+      const [key, value] = entry;
+      if (value) filteredMetadata[key] = value;
+    });
+
+    return filteredMetadata;
+  }
+
+  /**
+   * @description Alphabetically sort the fields in the log object.
+   */
+  private sortOutput(input: Record<string, any>) {
+    const sortedOutput: any = {};
+
+    Object.entries(input)
+      .sort()
+      .forEach(([key, value]) => (sortedOutput[key] = value));
+
+    return sortedOutput;
   }
 }

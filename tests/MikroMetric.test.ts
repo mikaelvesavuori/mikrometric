@@ -2,7 +2,11 @@ import test from 'ava';
 
 import { MikroMetric } from '../src/domain/entities/MikroMetric';
 
-const config = { namespace: 'MyNamespace', serviceName: 'MyService' };
+import event from '../testdata/event.json';
+import context from '../testdata/context.json';
+
+const config = { namespace: 'MyNamespace', serviceName: 'MyService', event, context };
+const configMinimal = { namespace: 'MyNamespace', serviceName: 'MyService' };
 
 function setEnv() {
   process.env.AWS_REGION = 'eu-north-1';
@@ -36,17 +40,43 @@ test.serial('It should set the instance to a new one', (t) => {
   t.is(isInstance, expected);
 });
 
-test.serial('It should set Lambda metadata', (t) => {
-  setEnv();
+test.serial('It should set AWS metadata with provided "event" and "context" objects', (t) => {
   const mikroMetric = MikroMetric.start(config);
-  mikroMetric.reset();
+
+  // Note: 'runtime' not present in event/context, only in AWS env
+  const expected = {
+    accountId: '123412341234',
+    correlationId: '6c933bd2-9535-45a8-b09c-84d00b4f50cc',
+    functionMemorySize: '1024',
+    functionName: 'somestack-FunctionName',
+    functionVersion: '$LATEST',
+    region: 'eu-north-1',
+    resource: '/functionName',
+    service: 'MyService',
+    stage: 'shared',
+    timestampRequest: '1657389598171',
+    user: 'some user',
+    viewerCountry: 'SE'
+  };
+
+  const result: any = mikroMetric.flush();
+  delete result['_aws'];
+  delete result['id'];
+  delete result['timestamp'];
+  delete result['timestampEpoch'];
+
+  // @ts-ignore
+  t.deepEqual(result, expected);
+});
+
+test.serial('It should set AWS metadata from environment', (t) => {
+  setEnv();
+  const mikroMetric = MikroMetric.start(configMinimal);
 
   const expected = {
     functionMemorySize: '512',
     functionName: 'TestFunction',
     functionVersion: '$LATEST',
-    logGroupName: 'TestFunctionLogGroup',
-    logStreamName: 'TestFunctionLogStream',
     region: 'eu-north-1',
     runtime: 'AWS_Lambda_nodejs16.x',
     service: 'MyService'
@@ -54,13 +84,31 @@ test.serial('It should set Lambda metadata', (t) => {
 
   const result: any = mikroMetric.flush();
   delete result['_aws'];
-
-  console.log('result', result);
+  delete result['id'];
+  delete result['timestamp'];
+  delete result['timestampEpoch'];
 
   // @ts-ignore
   t.deepEqual(result, expected);
 
   clearEnv();
+});
+
+test.serial('It should work without AWS metadata', (t) => {
+  const mikroMetric = MikroMetric.start(configMinimal);
+
+  const expected = {
+    service: 'MyService'
+  };
+
+  const result: any = mikroMetric.flush();
+  delete result['_aws'];
+  delete result['id'];
+  delete result['timestamp'];
+  delete result['timestampEpoch'];
+
+  // @ts-ignore
+  t.deepEqual(result, expected);
 });
 
 test.serial('It should capture the namespace from the process environment', (t) => {

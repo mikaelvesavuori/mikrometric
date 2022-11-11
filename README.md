@@ -21,7 +21,7 @@ MikroMetric is the quickest way to get going with AWS metrics (CloudWatch Embedd
 - Less bloated than the other major libraries
 - Cuts out all the stuff you won't need in cloud/serverless
 - Tiny (~1.6 KB gzipped)
-- Has zero dependencies
+- Has only one dependency, [`aws-metadata-utils`](https://github.com/mikaelvesavuori/aws-metadata-utils) (for picking out metadata)
 - Has 100% test coverage
 
 ## Usage
@@ -34,7 +34,16 @@ const { MikroMetric } = require('mikrometric');
 // ES6 format
 import { MikroMetric } from 'mikrometric';
 
+// Minimal usage
 const mikroMetric = MikroMetric.start({ namespace: 'MyNamespace', serviceName: 'MyServiceName' });
+
+// Using the AWS `event` and `context` objects
+const mikroMetric = MikroMetric.start({
+  namespace: 'MyNamespace',
+  serviceName: 'MyServiceName',
+  event,
+  context
+});
 
 mikroMetric.putDimension('user', 'Sam Person');
 mikroMetric.putMetric('duration', 83, 'Milliseconds');
@@ -43,38 +52,36 @@ mikroMetric.setProperty('correlationId', '8d5a0ba6-05e0-4c9b-bc7c-9164ea1bdedd')
 mikroMetric.flush();
 ```
 
-Your metric log will look something like this in CloudWatch Logs:
+Provided full `event` and `context` objects, your metric log will look something like this in CloudWatch Logs:
 
 ```json
 {
-  "service": "MyServiceName",
-  "region": "eu-north-1",
-  "runtime": "AWS_Lambda_nodejs16.x",
-  "functionName": "aws-emf-demo-dev-CreateExampleMetrics",
-  "functionMemorySize": "512",
-  "functionVersion": "$LATEST",
-  "logGroupName": "/aws/lambda/aws-emf-demo-dev-CreateExampleMetrics",
-  "logStreamName": "2022/10/23/[$LATEST]e731d9b847d04b54bb4e67ef248a3fd0",
   "_aws": {
-    "Timestamp": 1666550869329,
+    "Timestamp": 1668191447669,
     "CloudWatchMetrics": [
-      {
-        "Namespace": "MyNamespace",
-        "Dimensions": [["service", "user"]],
-        "Metrics": [
-          {
-            "Name": "duration",
-            "Unit": "Milliseconds"
-          }
-        ]
-      }
+      { "Namespace": "MyNamespace", "Dimensions": [["service"]], "Metrics": [] }
     ]
   },
-  "user": "Sam Person",
-  "duration": 83,
-  "correlationId": "8d5a0ba6-05e0-4c9b-bc7c-9164ea1bdedd"
+  "accountId": "123412341234",
+  "correlationId": "6c933bd2-9535-45a8-b09c-84d00b4f50cc",
+  "functionMemorySize": "1024",
+  "functionName": "somestack-FunctionName",
+  "functionVersion": "$LATEST",
+  "id": "3be48135-927a-4f71-ac7e-94bcd30723ba",
+  "region": "eu-north-1",
+  "resource": "/functionName",
+  "runtime": "AWS_Lambda_nodejs16.x",
+  "service": "MyService",
+  "stage": "shared",
+  "timestamp": "2022-11-11T18:30:47.669Z",
+  "timestampEpoch": "1668191447669",
+  "timestampRequest": "1657389598171",
+  "user": "some user",
+  "viewerCountry": "SE"
 }
 ```
+
+MikroMetric will grab as many values as possible. You will get fewer if these objects are not provided.
 
 The `namespace` and `serviceName` may be passed in either manually at init-time (as above), or be inferred via environment variables (see below). When initializing, some representation of these values **must** exist or an error will be thrown.
 
