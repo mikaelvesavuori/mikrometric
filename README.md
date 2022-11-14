@@ -123,6 +123,12 @@ Flushing will reset the MikroMetric instance. See `Reset` below.
 
 ### Other features
 
+#### Set the correlation ID manually
+
+```typescript
+mikroMetric.setCorrelationId('abc123');
+```
+
 #### Set the namespace manually
 
 ```typescript
