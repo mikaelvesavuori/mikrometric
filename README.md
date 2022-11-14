@@ -81,13 +81,37 @@ Provided full `event` and `context` objects, your metric log will look something
 }
 ```
 
-MikroMetric will grab as many values as possible. You will get fewer if these objects are not provided.
+MikroMetric will grab as many values as it can from the `event` and `context` objects. You will of course get fewer (or none) of the dynamic metadata values if these objects are not provided.
 
 The `namespace` and `serviceName` may be passed in either manually at init-time (as above), or be inferred via environment variables (see below). When initializing, some representation of these values **must** exist or an error will be thrown.
 
 You can now use [CloudWatch Logs Insights](https://console.aws.amazon.com/cloudwatch/home?#logsV2:logs-insights) and [CloudWatch Metrics](<https://console.aws.amazon.com/cloudwatch/home?#metricsV2:graph=~()>) to either search your logs or visualize your metrics.
 
 **For more learning resources regarding AWS observability solutions, see the [One Observability Workshop](https://catalog.workshops.aws/observability/en-US), especially the page on [EMF](https://catalog.workshops.aws/observability/en-US/emf/clientlibrary)**.
+
+### Setting custom static metadata
+
+```typescript
+import { MikroMetric } from 'mikrometric';
+
+// Use custom metadata
+const metadataConfig = {
+  version: 1,
+  hostPlatform: 'aws',
+  owner: 'MyCompany',
+  domain: 'MyDomain',
+  system: 'MySystem',
+  team: 'MyTeam',
+  tags: ['backend', 'typescript', 'api', 'serverless', 'my-service'],
+  dataSensitivity: 'proprietary'
+};
+
+const mikroMetric = MikroMetric.start({
+  namespace: 'MyNamespace',
+  serviceName: 'MyServiceName',
+  metadataConfig
+});
+```
 
 ### Creating metric logs
 

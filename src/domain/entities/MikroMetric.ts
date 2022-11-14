@@ -2,7 +2,8 @@ import { randomUUID } from 'crypto';
 
 import { getMetadata } from 'aws-metadata-utils';
 
-import { DynamicMetadata, MetricBaseObject, MetricObject } from '../interfaces/Metric';
+import { DynamicMetadata, StaticMetadataConfigInput } from '../interfaces/Metadata';
+import { MetricBaseObject, MetricObject } from '../interfaces/Metric';
 import { MikroMetricInput } from '../interfaces/MikroMetricInput';
 import { PropertyValue, Unit } from '../interfaces/Units';
 
@@ -35,6 +36,7 @@ mikroMetric.flush();
  */
 export class MikroMetric {
   private static instance: MikroMetric;
+  private static metadataConfig: StaticMetadataConfigInput | Record<string, any> = {};
   private static namespace: string;
   private static serviceName: string;
   private static event: any;
@@ -43,6 +45,7 @@ export class MikroMetric {
   private static metric: MetricBaseObject;
 
   private constructor(namespace: string, serviceName: string, event: any, context: any) {
+    MikroMetric.metadataConfig = {};
     MikroMetric.namespace = namespace;
     MikroMetric.serviceName = serviceName;
     MikroMetric.event = event;
@@ -69,6 +72,7 @@ export class MikroMetric {
     if (!MikroMetric.instance)
       MikroMetric.instance = new MikroMetric(namespace, serviceName, event, context);
 
+    MikroMetric.metadataConfig = input?.metadataConfig || {};
     MikroMetric.namespace = namespace;
     MikroMetric.serviceName = serviceName;
     MikroMetric.event = event;
@@ -223,6 +227,7 @@ export class MikroMetric {
   private createMetricObject(): MetricObject {
     const completeMetric = this.sortOutput({
       ...MikroMetric.metric,
+      ...MikroMetric.metadataConfig,
       ...this.createDynamicMetadata()
     });
 

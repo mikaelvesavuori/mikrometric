@@ -36,6 +36,53 @@ test.serial('It should set the instance to a new one', (t) => {
   t.is(isInstance, expected);
 });
 
+test.serial('It should set custom static metadata', (t) => {
+  const metadataConfig = {
+    version: 1,
+    hostPlatform: 'aws',
+    owner: 'MyCompany',
+    domain: 'MyDomain',
+    system: 'MySystem',
+    service: 'MyService',
+    team: 'MyTeam',
+    tags: ['backend', 'typescript', 'api', 'serverless', 'my-service'],
+    dataSensitivity: 'proprietary'
+  };
+
+  const mikroMetric = MikroMetric.start({ ...config, metadataConfig });
+
+  const expected = {
+    accountId: '123412341234',
+    correlationId: '6c933bd2-9535-45a8-b09c-84d00b4f50cc',
+    dataSensitivity: 'proprietary',
+    domain: 'MyDomain',
+    functionMemorySize: '1024',
+    functionName: 'somestack-FunctionName',
+    functionVersion: '$LATEST',
+    hostPlatform: 'aws',
+    owner: 'MyCompany',
+    region: 'eu-north-1',
+    resource: '/functionName',
+    service: 'MyService',
+    stage: 'shared',
+    system: 'MySystem',
+    tags: ['backend', 'typescript', 'api', 'serverless', 'my-service'],
+    team: 'MyTeam',
+    timestampRequest: '1657389598171',
+    user: 'some user',
+    version: 1,
+    viewerCountry: 'SE'
+  };
+
+  const result: any = mikroMetric.flush();
+  delete result['_aws'];
+  delete result['id'];
+  delete result['timestamp'];
+  delete result['timestampEpoch'];
+
+  t.deepEqual(result, expected);
+});
+
 test.serial('It should set AWS metadata with provided "event" and "context" objects', (t) => {
   const mikroMetric = MikroMetric.start(config);
 
@@ -61,7 +108,6 @@ test.serial('It should set AWS metadata with provided "event" and "context" obje
   delete result['timestamp'];
   delete result['timestampEpoch'];
 
-  // @ts-ignore
   t.deepEqual(result, expected);
 });
 
@@ -84,7 +130,6 @@ test.serial('It should set AWS metadata from environment', (t) => {
   delete result['timestamp'];
   delete result['timestampEpoch'];
 
-  // @ts-ignore
   t.deepEqual(result, expected);
 
   clearEnv();
@@ -103,7 +148,6 @@ test.serial('It should work without AWS metadata', (t) => {
   delete result['timestamp'];
   delete result['timestampEpoch'];
 
-  // @ts-ignore
   t.deepEqual(result, expected);
 });
 

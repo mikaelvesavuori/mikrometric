@@ -1,4 +1,10 @@
+import { StaticMetadataConfigInput } from './Metadata';
+
 export type MikroMetricInput = {
+  /**
+   * Static metadata configuration object.
+   */
+  metadataConfig?: StaticMetadataConfigInput | Record<string, any>;
   /**
    * @description The AWS CloudWatch namespace.
    */
