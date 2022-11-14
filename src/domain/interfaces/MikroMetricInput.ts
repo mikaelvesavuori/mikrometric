@@ -15,4 +15,8 @@ export type MikroMetricInput = {
    * @description AWS `context` object.
    */
   context?: any;
+  /**
+   * Manually set correlation ID.
+   */
+  correlationId?: string;
 };

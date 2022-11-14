@@ -39,6 +39,7 @@ export class MikroMetric {
   private static serviceName: string;
   private static event: any;
   private static context: any;
+  private static correlationId: string;
   private static metric: MetricBaseObject;
 
   private constructor(namespace: string, serviceName: string, event: any, context: any) {
@@ -46,6 +47,7 @@ export class MikroMetric {
     MikroMetric.serviceName = serviceName;
     MikroMetric.event = event;
     MikroMetric.context = context;
+    MikroMetric.correlationId = '';
     MikroMetric.metric = this.createBaseMetricObject();
   }
 
@@ -71,6 +73,7 @@ export class MikroMetric {
     MikroMetric.serviceName = serviceName;
     MikroMetric.event = event;
     MikroMetric.context = context;
+    MikroMetric.correlationId = input?.correlationId || '';
 
     return MikroMetric.instance;
   }
@@ -87,6 +90,15 @@ export class MikroMetric {
       MikroMetric.event,
       MikroMetric.context
     );
+  }
+
+  /**
+   * @description Set correlation ID manually, for example for use in cross-boundary calls.
+   *
+   * This value will be propagated to all future metrics.
+   */
+  public setCorrelationId(correlationId: string): void {
+    MikroMetric.correlationId = correlationId;
   }
 
   /**
@@ -214,7 +226,9 @@ export class MikroMetric {
       ...this.createDynamicMetadata()
     });
 
-    return this.filterMetadata(JSON.parse(JSON.stringify(completeMetric)));
+    const filtered = this.filterMetadata(completeMetric);
+
+    return JSON.parse(JSON.stringify(filtered));
   }
 
   /**
@@ -222,10 +236,12 @@ export class MikroMetric {
    * add some extra bits on top.
    */
   private createDynamicMetadata(): DynamicMetadata {
+    const metadata = getMetadata(MikroMetric.event, MikroMetric.context);
     const timeNow = Date.now();
 
     return {
-      ...getMetadata(MikroMetric.event, MikroMetric.context),
+      ...metadata,
+      correlationId: MikroMetric.correlationId || metadata.correlationId,
       id: randomUUID(),
       timestamp: new Date(timeNow).toISOString(),
       timestampEpoch: `${timeNow}`

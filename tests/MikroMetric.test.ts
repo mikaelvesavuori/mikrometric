@@ -141,6 +141,17 @@ test.serial('It should reset to a new instance', (t) => {
   t.is(result, expected);
 });
 
+test.serial('It should set the correlation ID', (t) => {
+  const mikroMetric = MikroMetric.start(config);
+  const expected = 'asdf1234';
+
+  mikroMetric.setCorrelationId(expected);
+  const log = mikroMetric.flush();
+  const result = log.correlationId;
+
+  t.is(result, expected);
+});
+
 test.serial('It should set the namespace', (t) => {
   const mikroMetric = MikroMetric.start(config);
   const expected = 'MyNewNamespace';
