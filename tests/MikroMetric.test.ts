@@ -14,8 +14,6 @@ function setEnv() {
   process.env.AWS_LAMBDA_FUNCTION_NAME = 'TestFunction';
   process.env.AWS_LAMBDA_FUNCTION_MEMORY_SIZE = '512';
   process.env.AWS_LAMBDA_FUNCTION_VERSION = '$LATEST';
-  process.env.AWS_LAMBDA_LOG_GROUP_NAME = 'TestFunctionLogGroup';
-  process.env.AWS_LAMBDA_LOG_STREAM_NAME = 'TestFunctionLogStream';
 }
 
 function clearEnv() {
@@ -24,8 +22,6 @@ function clearEnv() {
   process.env.AWS_LAMBDA_FUNCTION_NAME = '';
   process.env.AWS_LAMBDA_FUNCTION_MEMORY_SIZE = '';
   process.env.AWS_LAMBDA_FUNCTION_VERSION = '';
-  process.env.AWS_LAMBDA_LOG_GROUP_NAME = '';
-  process.env.AWS_LAMBDA_LOG_STREAM_NAME = '';
 }
 
 /**
