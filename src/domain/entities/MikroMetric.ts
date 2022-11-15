@@ -226,9 +226,9 @@ export class MikroMetric {
    */
   private createMetricObject(): MetricObject {
     const completeMetric = this.sortOutput({
-      ...MikroMetric.metric,
+      ...this.createDynamicMetadata(),
       ...MikroMetric.metadataConfig,
-      ...this.createDynamicMetadata()
+      ...MikroMetric.metric
     });
 
     const filtered = this.filterMetadata(completeMetric);

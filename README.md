@@ -187,6 +187,16 @@ You can set `MIKROMETRIC_NAMESPACE` and/or `MIKROMETRIC_SERVICE_NAME` respective
 
 **Any values manually passed in will always take precedence**.
 
+## Behavior of output
+
+Output fields will be spread (and potentially deduplicating same-named properties) in the following order:
+
+1. Dynamic metadata (AWS)
+2. Custom static metadata
+3. Properties
+
+A higher number means that fields in that category will persist if any fields have same names in lower-numbered categories.
+
 ## License
 
 MIT. See `LICENSE` file.

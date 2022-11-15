@@ -103,6 +103,7 @@ test.serial('It should set AWS metadata with provided "event" and "context" obje
   };
 
   const result: any = mikroMetric.flush();
+  console.log('result', result);
   delete result['_aws'];
   delete result['id'];
   delete result['timestamp'];
@@ -134,6 +135,22 @@ test.serial('It should set AWS metadata from environment', (t) => {
 
   clearEnv();
 });
+
+test.serial(
+  'It should keep directly set/put properties in output if the property name overlap with dynamic metadata',
+  (t) => {
+    setEnv();
+
+    const expected = 'Sam Person';
+    const mikroMetric = MikroMetric.start(config);
+
+    mikroMetric.putMetric('user', expected);
+    const result: any = mikroMetric.flush().user;
+
+    t.deepEqual(result, expected);
+    clearEnv();
+  }
+);
 
 test.serial('It should work without AWS metadata', (t) => {
   const mikroMetric = MikroMetric.start(configMinimal);
