@@ -1,7 +1,7 @@
 {
   "name": "mikrometric",
   "description": "mikrometric is a Lambda-oriented lightweight wrapper for producing AWS CloudWatch Embedded Metric Format-compatible metric logs.",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "author": "Mikael Vesavuori",
   "license": "MIT",
   "main": "./lib/index.js",
@@ -47,7 +47,7 @@
     "@types/node": "18",
     "@typescript-eslint/eslint-plugin": "5",
     "@typescript-eslint/parser": "5",
-    "ava": "4",
+    "ava": "5",
     "c8": "7",
     "eslint": "8",
     "eslint-config-prettier": "8",
@@ -55,7 +55,7 @@
     "husky": "8",
     "prettier": "2",
     "ts-node": "10",
-    "typedoc": "^0.23.20",
+    "typedoc": "^0.23.23",
     "typescript": "4"
   },
   "ava": {

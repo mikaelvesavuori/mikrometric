@@ -5,7 +5,12 @@ import { MikroMetric } from '../src/domain/entities/MikroMetric';
 import event from '../testdata/event.json';
 import context from '../testdata/context.json';
 
-const config = { namespace: 'MyNamespace', serviceName: 'MyService', event, context };
+const config = {
+  namespace: 'MyNamespace',
+  serviceName: 'MyService',
+  event,
+  context
+};
 const configMinimal = { namespace: 'MyNamespace', serviceName: 'MyService' };
 
 function setEnv() {
@@ -114,6 +119,7 @@ test.serial('It should set AWS metadata with provided "event" and "context" obje
 
 test.serial('It should set AWS metadata from environment', (t) => {
   setEnv();
+
   const mikroMetric = MikroMetric.start(configMinimal);
 
   const expected = {

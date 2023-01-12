@@ -44,12 +44,12 @@ export class MikroMetric {
   private static correlationId: string;
   private static metric: MetricBaseObject;
 
-  private constructor(namespace: string, serviceName: string, event: any, context: any) {
-    MikroMetric.metadataConfig = {};
+  private constructor(namespace: string, serviceName: string, event?: any, context?: any) {
     MikroMetric.namespace = namespace;
     MikroMetric.serviceName = serviceName;
-    MikroMetric.event = event;
-    MikroMetric.context = context;
+    MikroMetric.event = event || {};
+    MikroMetric.context = context || {};
+    MikroMetric.metadataConfig = {};
     MikroMetric.correlationId = '';
     MikroMetric.metric = this.createBaseMetricObject();
   }
@@ -66,18 +66,20 @@ export class MikroMetric {
     const serviceName = input?.serviceName || process.env.MIKROMETRIC_SERVICE_NAME || '';
     if (!namespace || !serviceName) throw new MissingRequiredStartParamsError();
 
-    const event = input?.event || {};
-    const context = input?.context || {};
+    const event = input?.event || this.event;
+    const context = input?.context || this.context;
+    const metadataConfig = input?.metadataConfig || this.metadataConfig;
+    const correlationId = input?.correlationId || this.correlationId || '';
 
     if (!MikroMetric.instance)
       MikroMetric.instance = new MikroMetric(namespace, serviceName, event, context);
 
-    MikroMetric.metadataConfig = input?.metadataConfig || {};
+    MikroMetric.metadataConfig = metadataConfig;
     MikroMetric.namespace = namespace;
     MikroMetric.serviceName = serviceName;
     MikroMetric.event = event;
     MikroMetric.context = context;
-    MikroMetric.correlationId = input?.correlationId || '';
+    MikroMetric.correlationId = correlationId;
 
     return MikroMetric.instance;
   }
@@ -88,12 +90,7 @@ export class MikroMetric {
    * @example mikroMetric.reset();
    */
   public reset(): void {
-    MikroMetric.instance = new MikroMetric(
-      MikroMetric.namespace,
-      MikroMetric.serviceName,
-      MikroMetric.event,
-      MikroMetric.context
-    );
+    MikroMetric.instance = new MikroMetric(MikroMetric.namespace, MikroMetric.serviceName);
   }
 
   /**
