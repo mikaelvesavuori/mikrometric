@@ -191,7 +191,7 @@ export class MikroMetric {
    */
   public flush(): MetricObject {
     const metric = this.createMetricObject();
-    console.log(JSON.stringify(metric));
+    process.stdout.write(JSON.stringify(metric) + '\n');
     this.reset();
     return metric;
   }
