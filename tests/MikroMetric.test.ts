@@ -245,11 +245,29 @@ test.serial('It should put a metric', (t) => {
   const mikroMetric = MikroMetric.start(config);
   const expected = true;
 
-  mikroMetric.putMetric('Duration', 83, 'Milliseconds');
+  const metricName = 'Duration';
+  const metricCount = 83;
+
+  mikroMetric.putMetric(metricName, metricCount, 'Milliseconds');
   const log = mikroMetric.flush();
   const metric = log._aws.CloudWatchMetrics[0].Metrics[0];
 
-  const result = metric['Name'] === 'Duration';
+  const result = metric['Name'] === metricName && log[metricName] === metricCount;
+  t.is(result, expected);
+});
+
+test.serial('It should put a metric with a zero value', (t) => {
+  const mikroMetric = MikroMetric.start(config);
+  const expected = true;
+
+  const metricName = 'Failure';
+  const metricCount = 0;
+
+  mikroMetric.putMetric(metricName, metricCount, 'Count');
+  const log = mikroMetric.flush();
+  const metric = log._aws.CloudWatchMetrics[0].Metrics[0];
+
+  const result = metric['Name'] === metricName && log[metricName] === metricCount;
   t.is(result, expected);
 });
 

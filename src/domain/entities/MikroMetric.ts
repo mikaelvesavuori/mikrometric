@@ -281,7 +281,7 @@ export class MikroMetric {
 
     Object.entries(metadata).forEach((entry: any) => {
       const [key, value] = entry;
-      if (value) filteredMetadata[key] = value;
+      if (value || value === 0) filteredMetadata[key] = value;
     });
 
     return filteredMetadata;
