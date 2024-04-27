@@ -7,3 +7,4 @@ coverage/
 node_modules/
 docs/
 *.tgz
+.DS_Store
