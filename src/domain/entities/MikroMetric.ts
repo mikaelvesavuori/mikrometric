@@ -2,17 +2,17 @@ import { randomUUID } from 'crypto';
 
 import { getMetadata } from 'aws-metadata-utils';
 
-import { DynamicMetadata, StaticMetadataConfigInput } from '../interfaces/Metadata';
-import { MetricBaseObject, MetricObject } from '../interfaces/Metric';
-import { MikroMetricInput } from '../interfaces/MikroMetricInput';
-import { PropertyValue, Unit } from '../interfaces/Units';
+import { DynamicMetadata, StaticMetadataConfigInput } from '../interfaces/Metadata.js';
+import { MetricBaseObject, MetricObject } from '../interfaces/Metric.js';
+import { MikroMetricInput } from '../interfaces/MikroMetricInput.js';
+import { PropertyValue, Unit } from '../interfaces/Units.js';
 
 import {
   CannotAddMoreItemsToArrayError,
   HasNonAsciiCharactersError,
   LengthNotWithinBoundsError,
   MissingRequiredStartParamsError
-} from '../../application/errors/errors';
+} from '../../application/errors/errors.js';
 
 /**
  * @description MikroMetric is a Lambda-oriented lightweight wrapper

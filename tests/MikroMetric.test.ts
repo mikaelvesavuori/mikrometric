@@ -1,9 +1,15 @@
-import test from 'ava';
+import { test, expect } from 'vitest';
 
-import { MikroMetric } from '../src/domain/entities/MikroMetric';
+import { MikroMetric } from '../src/domain/entities/MikroMetric.js';
 
 import event from '../testdata/event.json';
 import context from '../testdata/context.json';
+import {
+  CannotAddMoreItemsToArrayError,
+  HasNonAsciiCharactersError,
+  LengthNotWithinBoundsError,
+  MissingRequiredStartParamsError
+} from '../src/application/errors/errors.js';
 
 const config = {
   namespace: 'MyNamespace',
@@ -32,16 +38,16 @@ function clearEnv() {
 /**
  * POSITIVE TESTS
  */
-test.serial('It should set the instance to a new one', (t) => {
+test('It should set the instance to a new one', () => {
   const mikroMetric = MikroMetric.start(config);
   const expected = true;
 
   const isInstance = mikroMetric instanceof MikroMetric;
 
-  t.is(isInstance, expected);
+  expect(isInstance).toBe(expected);
 });
 
-test.serial('It should set custom static metadata', (t) => {
+test('It should set custom static metadata', () => {
   const metadataConfig = {
     version: 1,
     hostPlatform: 'aws',
@@ -85,10 +91,10 @@ test.serial('It should set custom static metadata', (t) => {
   delete result['timestamp'];
   delete result['timestampEpoch'];
 
-  t.deepEqual(result, expected);
+  expect(result).toMatchObject(expected);
 });
 
-test.serial('It should set AWS metadata with provided "event" and "context" objects', (t) => {
+test('It should set AWS metadata with provided "event" and "context" objects', () => {
   const mikroMetric = MikroMetric.start(config);
 
   // Note: 'runtime' not present in event/context, only in AWS env
@@ -114,10 +120,10 @@ test.serial('It should set AWS metadata with provided "event" and "context" obje
   delete result['timestamp'];
   delete result['timestampEpoch'];
 
-  t.deepEqual(result, expected);
+  expect(result).toMatchObject(expected);
 });
 
-test.serial('It should set AWS metadata from environment', (t) => {
+test('It should set AWS metadata from environment', () => {
   setEnv();
 
   const mikroMetric = MikroMetric.start(configMinimal);
@@ -137,28 +143,25 @@ test.serial('It should set AWS metadata from environment', (t) => {
   delete result['timestamp'];
   delete result['timestampEpoch'];
 
-  t.deepEqual(result, expected);
+  expect(result).toMatchObject(expected);
 
   clearEnv();
 });
 
-test.serial(
-  'It should keep directly set/put properties in output if the property name overlap with dynamic metadata',
-  (t) => {
-    setEnv();
+test('It should keep directly set/put properties in output if the property name overlap with dynamic metadata', () => {
+  setEnv();
 
-    const expected = 'Sam Person';
-    const mikroMetric = MikroMetric.start(config);
+  const expected = 'Sam Person';
+  const mikroMetric = MikroMetric.start(config);
 
-    mikroMetric.putMetric('user', expected);
-    const result: any = mikroMetric.flush().user;
+  mikroMetric.putMetric('user', expected);
+  const result: any = mikroMetric.flush().user;
 
-    t.deepEqual(result, expected);
-    clearEnv();
-  }
-);
+  expect(result).toMatchObject(expected);
+  clearEnv();
+});
 
-test.serial('It should work without AWS metadata', (t) => {
+test('It should work without AWS metadata', () => {
   const mikroMetric = MikroMetric.start(configMinimal);
 
   const expected = {
@@ -171,32 +174,32 @@ test.serial('It should work without AWS metadata', (t) => {
   delete result['timestamp'];
   delete result['timestampEpoch'];
 
-  t.deepEqual(result, expected);
+  expect(result).toMatchObject(expected);
 });
 
-test.serial('It should capture the namespace from the process environment', (t) => {
+test('It should capture the namespace from the process environment', () => {
   const expected = 'MyNamespace';
   process.env.MIKROMETRIC_NAMESPACE = expected;
 
   const mikroMetric = MikroMetric.start({ serviceName: 'MyService' });
 
   const result = mikroMetric.getNamespace();
-  t.is(result, expected);
+  expect(result).toBe(expected);
   process.env.MIKROMETRIC_NAMESPACE = '';
 });
 
-test.serial('It should capture the service name from the process environment', (t) => {
+test('It should capture the service name from the process environment', () => {
   const expected = 'MyService';
   process.env.MIKROMETRIC_SERVICE_NAME = expected;
 
   const mikroMetric = MikroMetric.start({ namespace: 'MyNamespace' });
 
   const result = mikroMetric.getServiceName();
-  t.is(result, expected);
+  expect(result).toBe(expected);
   process.env.MIKROMETRIC_SERVICE_NAME = '';
 });
 
-test.serial('It should reset to a new instance', (t) => {
+test('It should reset to a new instance', () => {
   const mikroMetric = MikroMetric.start(config);
   const expected = true;
 
@@ -205,10 +208,10 @@ test.serial('It should reset to a new instance', (t) => {
   const log = mikroMetric.flush();
 
   const result = log._aws.CloudWatchMetrics[0].Metrics[0] === undefined;
-  t.is(result, expected);
+  expect(result).toBe(expected);
 });
 
-test.serial('It should set the correlation ID', (t) => {
+test('It should set the correlation ID', () => {
   const mikroMetric = MikroMetric.start(config);
   const expected = 'asdf1234';
 
@@ -216,20 +219,20 @@ test.serial('It should set the correlation ID', (t) => {
   const log = mikroMetric.flush();
   const result = log.correlationId;
 
-  t.is(result, expected);
+  expect(result).toBe(expected);
 });
 
-test.serial('It should set the namespace', (t) => {
+test('It should set the namespace', () => {
   const mikroMetric = MikroMetric.start(config);
   const expected = 'MyNewNamespace';
 
   mikroMetric.setNamespace(expected);
 
   const result = mikroMetric.getNamespace();
-  t.is(result, expected);
+  expect(result).toBe(expected);
 });
 
-test.serial('It should put a dimension', (t) => {
+test('It should put a dimension', () => {
   const mikroMetric = MikroMetric.start(config);
   const expected = true;
 
@@ -238,10 +241,10 @@ test.serial('It should put a dimension', (t) => {
   const dimensions = log._aws.CloudWatchMetrics[0].Dimensions[0];
 
   const result = dimensions.includes('user');
-  t.is(result, expected);
+  expect(result).toBe(expected);
 });
 
-test.serial('It should put a metric', (t) => {
+test('It should put a metric', () => {
   const mikroMetric = MikroMetric.start(config);
   const expected = true;
 
@@ -253,10 +256,10 @@ test.serial('It should put a metric', (t) => {
   const metric = log._aws.CloudWatchMetrics[0].Metrics[0];
 
   const result = metric['Name'] === metricName && log[metricName] === metricCount;
-  t.is(result, expected);
+  expect(result).toBe(expected);
 });
 
-test.serial('It should put a metric with a zero value', (t) => {
+test('It should put a metric with a zero value', () => {
   const mikroMetric = MikroMetric.start(config);
   const expected = true;
 
@@ -268,10 +271,10 @@ test.serial('It should put a metric with a zero value', (t) => {
   const metric = log._aws.CloudWatchMetrics[0].Metrics[0];
 
   const result = metric['Name'] === metricName && log[metricName] === metricCount;
-  t.is(result, expected);
+  expect(result).toBe(expected);
 });
 
-test.serial('It should put a metric without a unit provided', (t) => {
+test('It should put a metric without a unit provided', () => {
   const mikroMetric = MikroMetric.start(config);
   const expected = true;
 
@@ -280,10 +283,10 @@ test.serial('It should put a metric without a unit provided', (t) => {
   const metric = log._aws.CloudWatchMetrics[0].Metrics[0];
 
   const result = metric['Unit'] === 'None';
-  t.is(result, expected);
+  expect(result).toBe(expected);
 });
 
-test.serial('It should set a property', (t) => {
+test('It should set a property', () => {
   const mikroMetric = MikroMetric.start(config);
   const expected = 'Something';
   const key = 'MyProperty';
@@ -291,75 +294,59 @@ test.serial('It should set a property', (t) => {
   mikroMetric.setProperty(key, expected);
   const result = mikroMetric.flush();
 
-  t.is(result[key], expected);
+  expect(result[key]).toBe(expected);
 });
 
 /**
  * FAILURE TESTS
  */
-test.serial(
-  'Starting without neither namespace or service name will throw a MissingRequiredStartParamsError',
-  (t) => {
-    const error: any = t.throws(() => MikroMetric.start());
-
-    t.is(error.name, 'MissingRequiredStartParamsError');
-  }
-);
-
-test.serial('Starting without a service name will throw a MissingRequiredStartParamsError', (t) => {
-  const error: any = t.throws(() => MikroMetric.start({ namespace: 'MyNamespace' }));
-
-  t.is(error.name, 'MissingRequiredStartParamsError');
+test('Starting without neither namespace or service name will throw a MissingRequiredStartParamsError', () => {
+  expect(() => MikroMetric.start()).toThrow(MissingRequiredStartParamsError);
 });
 
-test.serial('Starting without a namespace will throw a MissingRequiredStartParamsError', (t) => {
-  const error: any = t.throws(() => MikroMetric.start({ serviceName: 'MyService' }));
-
-  t.is(error.name, 'MissingRequiredStartParamsError');
+test('Starting without a service name will throw a MissingRequiredStartParamsError', () => {
+  expect(() => MikroMetric.start({ namespace: 'MyNamespace' })).toThrow(
+    MissingRequiredStartParamsError
+  );
 });
 
-test.serial(
-  'It should throw a HasNonAsciiCharactersError if a string key contains non-ASCII characters',
-  (t) => {
-    const mikroMetric = MikroMetric.start(config);
+test('Starting without a namespace will throw a MissingRequiredStartParamsError', () => {
+  expect(() => MikroMetric.start({ serviceName: 'MyService' })).toThrow(
+    MissingRequiredStartParamsError
+  );
+});
 
-    const error: any = t.throws(() => {
-      mikroMetric.setProperty('$@][®˛π√ƒß', 'AnythingHere');
-    });
-
-    t.is(error.name, 'HasNonAsciiCharactersError');
-  }
-);
-
-test.serial('It should throw a CannotAddMoreItemsToArrayError if an array is maxed out', (t) => {
+test('It should throw a HasNonAsciiCharactersError if a string key contains non-ASCII characters', () => {
   const mikroMetric = MikroMetric.start(config);
 
-  const error: any = t.throws(() => {
+  expect(() => mikroMetric.setProperty('$@][®˛π√ƒß', 'AnythingHere')).toThrow(
+    HasNonAsciiCharactersError
+  );
+});
+
+test('It should throw a CannotAddMoreItemsToArrayError if an array is maxed out', () => {
+  const mikroMetric = MikroMetric.start(config);
+
+  expect(() => {
     for (let x = 0; x <= 30; x++) {
       mikroMetric.putDimension(`${x}`, 'Testing');
     }
-  });
-
-  t.is(error.name, 'CannotAddMoreItemsToArrayError');
+  }).toThrow(CannotAddMoreItemsToArrayError);
 });
 
-test.serial('It should throw a LengthNotWithinBoundsError if a string is too short', (t) => {
+test('It should throw a LengthNotWithinBoundsError if a string is too short', () => {
   const mikroMetric = MikroMetric.start(config);
 
-  const error: any = t.throws(() => mikroMetric.setProperty('', ''));
-
-  t.is(error.name, 'LengthNotWithinBoundsError');
+  expect(() => mikroMetric.setProperty('', '')).toThrow(LengthNotWithinBoundsError);
 });
 
-test.serial('It should throw a LengthNotWithinBoundsError if a string is too long', (t) => {
+test('It should throw a LengthNotWithinBoundsError if a string is too long', () => {
   const mikroMetric = MikroMetric.start(config);
 
-  const error: any = t.throws(() => {
+  expect(() =>
     mikroMetric.setProperty(
       'alksjdpaoishdoiaushdoiuasgdoiuagdoi3t9387cgyaj,sbclaugsodiabtsod7civtao87sETVOa78etvoa87tDCSVOA87tsdvo8as7TDVO87TQ3V8C7DTASHJDGKajygsduaRTSD67arsdrvialksjdpaoishdoiaushdoiuasgdoiuagdoi3t9387cgyaj,sbclaugsodiabtsod7civtao87sETVOa78aldjh3fo8ahsliuhdaliusdghas',
       'Testing'
-    );
-  });
-
-  t.is(error.name, 'LengthNotWithinBoundsError');
+    )
+  ).toThrow(LengthNotWithinBoundsError);
 });

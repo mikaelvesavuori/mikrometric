@@ -1,1 +1,1 @@
-export * from './domain/entities/MikroMetric';
+export * from './domain/entities/MikroMetric.js';

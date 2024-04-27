@@ -1,5 +1,5 @@
-import { DynamicMetadata } from './Metadata';
-import { PropertyValue, Unit } from './Units';
+import { DynamicMetadata } from './Metadata.js';
+import { PropertyValue, Unit } from './Units.js';
 
 /**
  * @description Base metric object.

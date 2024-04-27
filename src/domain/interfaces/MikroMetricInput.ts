@@ -1,4 +1,4 @@
-import { StaticMetadataConfigInput } from './Metadata';
+import { StaticMetadataConfigInput } from './Metadata.js';
 
 export type MikroMetricInput = {
   /**
